@@ -25,6 +25,8 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # Load Clerk API URL
 CLERK_FRONTEND_API_URL = env('CLERK_FRONTEND_API_URL', default='')
 
+APPEND_SLASH = False
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -35,7 +37,6 @@ SECRET_KEY = 'django-insecure-r3rjmj+f_za=9k*c9de-$kb^z$%)_2t6^cgia4&4@bx5^*)#*_
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-
 
 # Application definition
 
@@ -96,6 +97,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+import sys
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -106,7 +108,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

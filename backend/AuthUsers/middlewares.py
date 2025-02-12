@@ -32,7 +32,7 @@ class JWTAuthenticationMiddleware(BaseAuthentication):
             raise AuthenticationFailed("Bearer token not provided.")
         user = self.decode_jwt(token)
         clerk = ClerkSDK()
-        info, found = clerk.fetch_user_info(user.username)
+        info, found = clerk.fetch_user_info(user.clerk_id)
         if not user:
             return None
         else:
@@ -48,7 +48,10 @@ class JWTAuthenticationMiddleware(BaseAuthentication):
 def decode_jwt(self, token):
     clerk = ClerkSDK()
     jwks_data = clerk.get_jwks()
-    public_key = RSAAlgorithm.from_jwk(jwks_data["keys"][0])
+    keys = jwks_data.get("keys", [])
+    if not keys:
+        raise AuthenticationFailed("No public keys found.")
+    public_key = RSAAlgorithm.from_jwk(keys[0])
 
     try:
         payload = jwt.decode(

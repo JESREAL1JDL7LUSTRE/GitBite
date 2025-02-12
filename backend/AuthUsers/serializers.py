@@ -1,12 +1,26 @@
 from django.contrib.auth.models import User
 from rest_framework import permissions, serializers, viewsets
-
+from .models import Customer
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'  # <-- This line is required to avoid the AssertionError
 
+
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = '__all__'  # Expose all fields safely
+        read_only_fields = ['created_at', 'last_login'] 
+        
+class CustomerViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows customers to be viewed or edited.
+    """
+    queryset = Customer.objects.all().order_by("-created_at")  # Use created_at instead of date_joined
+    serializer_class = CustomerSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 class UserViewSet(viewsets.ModelViewSet):
     """
