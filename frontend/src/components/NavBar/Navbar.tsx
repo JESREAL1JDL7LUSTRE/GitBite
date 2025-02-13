@@ -1,36 +1,38 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logo from '@/assets/logo.png'
-import SignInAndSignUp from "./SignInAndSignUp";
 import { ModeToggle } from "../ui/mode-toggle";
 LucideImport
-  import { LucideImport, ShoppingBasket, ShoppingCart } from "lucide-react";
+  import { LucideImport, ShoppingCart } from "lucide-react";
+import { Button } from "../ui/button";
+import { Item } from "@radix-ui/react-dropdown-menu";
+import { NavMenu } from "./NavMenu";
+
 export default function Navbar() {
+  const nav = useNavigate()
   return (
-  <nav>
-    <div id="container" className="fixed top-0 left-0 border-b-2 border-gray-500 bg-white-500 flex w-full p-1">
-        <Link to='/' className='nav-logo flex items-center ml-2'>
+    <>
+      <nav>
+        <div className="container flex justify-between items-center py-2">
+          <div className="flex items-center gap-1 font-bold">
+        <Link to='/' className='nav-logo'>
           <img src={logo} alt='logo' width={50} />
         </Link>
-        <div></div>
-        <ul className='nav-menu flex items-center justify-center w-full flex-grow space-x-5 '>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/Menu">Menu</Link>
-          </li>
-          <div>
-            <ShoppingCart />
+        <p>BrandName</p>
           </div>
-          <div>
-            <SignInAndSignUp />
+          <div className="flex items-center gap-4">
+        <div className="hidden md:block">
+          <ul>
+            <NavMenu />
+          </ul>
+        </div>
+        <Button onClick={() => { nav('cart') }}><ShoppingCart /></Button>
+        <Button onClick={() => { nav('login') }}>Login</Button>
+        <ModeToggle />
           </div>
-          <div> 
-            <ModeToggle />
-          </div>
+        </div>
+      </nav>
           
-        </ul>    
-    </div>
-  </nav>
+    </>
+  
   )
 }
