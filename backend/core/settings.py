@@ -20,10 +20,12 @@ import os
 
 # Initialize environment variables
 env = environ.Env()
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+env.read_env(env.str('ENV_PATH', os.path.join(BASE_DIR, ".env")))
 
 # Load Clerk API URL
 CLERK_FRONTEND_API_URL = env('CLERK_FRONTEND_API_URL', default='')
+CLERK_PEM_PUBLIC_KEY = os.getenv("CLERK_PEM_PUBLIC_KEY", default='')
+CLERK_SECRET_KEY = env("CLERK_SECRET_KEY")
 
 APPEND_SLASH = False
 
@@ -38,6 +40,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+ALLOWED_PARTIES = [CLERK_FRONTEND_API_URL]
+
+print("DEBUG: CLERK_FRONTEND_API_URL =", CLERK_FRONTEND_API_URL)
+print("DEBUG: CLERK_SECRET_KEY =", CLERK_SECRET_KEY)
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -50,18 +57,20 @@ INSTALLED_APPS = [
     'AuthUsers',
     'corsheaders',
     'rest_framework',
+    'clerk_django',
+    'django_extensions'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'clerk_django.middlewares.clerk.ClerkAuthMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'clerk_django.middlewares.clerk.ClerkAuthMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware'
 ]
 
 REST_FRAMEWORK = {
@@ -73,9 +82,20 @@ REST_FRAMEWORK = {
 }
 
 #chanege it when deploying
+
+CSP_FONT_SRC = ("'self'", "https://assets.ngrok.com")
+
+
+CORS_ALLOW_ALL_ORIGINS = True
+
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://rapid-humpback-80.clerk.accounts.dev",
 ]
+
+CORS_ALLOW_CREDENTIALS = True
+
 
 ROOT_URLCONF = 'core.urls'
 

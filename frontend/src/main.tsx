@@ -7,6 +7,11 @@ import Item from "./pages/Item.tsx";
 import LayoutFor from "./components/LayoutFor.tsx";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const FRONTEND_API = import.meta.env.VITE_CLERK_FRONTEND_API_URL;
+
+if (!FRONTEND_API) {
+  throw new Error("❌ Missing VITE_CLERK_FRONTEND_API_URL in .env");
+}
 
 const router = createBrowserRouter([
   {
