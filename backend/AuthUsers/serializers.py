@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import permissions, serializers, viewsets
 from .models import Customer
+from rest_framework.permissions import AllowAny
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,7 +21,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
     """
     queryset = Customer.objects.all().order_by("-created_at")  # Use created_at instead of date_joined
     serializer_class = CustomerSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [AllowAny]
 
 class UserViewSet(viewsets.ModelViewSet):
     """

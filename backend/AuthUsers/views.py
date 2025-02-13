@@ -5,6 +5,11 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from svix.webhooks import Webhook, WebhookVerificationError
 from .models import Customer
+from .serializers import CustomerSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 
 logger = logging.getLogger(__name__)
 
@@ -92,9 +97,31 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import Customer
 
-@login_required
+class LoggedInCustomerView(APIView):
+    permission_classes = [IsAuthenticated]  # ✅ Requires authentication
+
+    def get(self, request):
+        try:
+            customer = Customer.objects.get(email=request.user.email)
+            serializer = CustomerSerializer(customer)
+            return Response(serializer.data)
+        except Customer.DoesNotExist:
+            return Response({"error": "User not found"}, status=404)
+
+from django.http import JsonResponse
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from .models import Customer
+from rest_framework.authentication import BaseAuthentication
+
+@api_view(["GET"])
+@authentication_classes([BaseAuthentication])
+@permission_classes([IsAuthenticated])
 def user_profile(request):
     try:
+        print("User:", request.user)  # Debugging
+        print("Email:", request.user.email)  # Debugging
+
         customer = Customer.objects.get(email=request.user.email)
         return JsonResponse({
             "id": customer.clerk_id,

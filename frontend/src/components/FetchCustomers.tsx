@@ -1,48 +1,63 @@
+import { useAuth } from "@clerk/clerk-react"; // Import Clerk hook
+import AXIOS_API from "@/components/api";
 import { useEffect, useState } from "react";
 
-interface User {
+interface Customer {
   id: string;
   email: string;
   first_name: string;
   last_name: string;
 }
 
-const fetchUser = async (): Promise<User | null> => {
-  try {
-    const response = await fetch("https://your-ngrok-url/api/customers/", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-      },
-    });
-
-    if (!response.ok) throw new Error("Failed to fetch user data");
-
-    const userData: User = await response.json();
-    console.log("User Data:", userData);
-    return userData;
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    return null;
-  }
-};
-
-const Profile = () => {
-  const [user, setUser] = useState<User | null>(null);
+const FetchCustomerData = () => {
+  const { getToken, isSignedIn } = useAuth(); // Get token from Clerk
+  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchUser().then(setUser);
-  }, []);
+    const fetchCustomer = async () => {
+      if (!isSignedIn) {
+        setError("User not logged in");
+        setLoading(false);
+        return;
+      }
 
-  if (!user) return <p>Loading user data...</p>;
+      try {
+        const token = await getToken(); // ✅ Get Clerk JWT token
+        console.log("Token being sent:", token); // Debugging
+
+        const response = await AXIOS_API.get("/api/my-profile/", {
+          headers: { Authorization: `Bearer ${token}` }, // ✅ Send token
+        });
+
+        setCustomer(response.data);
+      } catch (error) {
+        console.error(error);
+        setError("Failed to fetch customer data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCustomer();
+  }, [getToken, isSignedIn]); // ✅ Runs only when authentication state changes
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
 
   return (
-    <div>
-      <h1>Welcome, {user.first_name} {user.last_name}</h1>
-      <p>Email: {user.email}</p>
+    <div className="bg-white p-4 shadow-md rounded-lg">
+      <h2 className="text-xl font-semibold mb-2">Logged-in Customer</h2>
+      {customer ? (
+        <p>
+          {customer.first_name} {customer.last_name} ({customer.email})
+        </p>
+      ) : (
+        <p>No customer data available</p>
+      )}
     </div>
   );
 };
 
-export default Profile;
+export default FetchCustomerData;

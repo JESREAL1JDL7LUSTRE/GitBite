@@ -1,7 +1,6 @@
 # middleware.py
 import datetime
 from datetime import datetime
-
 import environ
 import jwt
 import pytz
@@ -27,7 +26,10 @@ class JWTAuthenticationMiddleware(BaseAuthentication):
         if not auth_header:
             return None
         try:
-            token = auth_header.split(" ")[1]
+            if not auth_header or " " not in auth_header:
+                raise AuthenticationFailed("Invalid Authorization header format.")
+
+            token = auth_header.split(" ")[1]  # ✅ Fix
         except IndexError:
             raise AuthenticationFailed("Bearer token not provided.")
         user = self.decode_jwt(token)
@@ -45,40 +47,40 @@ class JWTAuthenticationMiddleware(BaseAuthentication):
 
         return user, None
 
-def decode_jwt(self, token):
-    clerk = ClerkSDK()
-    jwks_data = clerk.get_jwks()
-    keys = jwks_data.get("keys", [])
-    if not keys:
-        raise AuthenticationFailed("No public keys found.")
-    public_key = RSAAlgorithm.from_jwk(keys[0])
+    def decode_jwt(self, token):
+        clerk = ClerkSDK()
+        jwks_data = clerk.get_jwks()
+        keys = jwks_data.get("keys", [])
+        if not keys:
+            raise AuthenticationFailed("No public keys found.")
+        public_key = RSAAlgorithm.from_jwk(keys[0])
 
-    try:
-        payload = jwt.decode(
-            token,
-            public_key,
-            algorithms=["RS256"],
-            options={"verify_signature": True},
-        )
-    except jwt.ExpiredSignatureError:
-        raise AuthenticationFailed("Token has expired.")
-    except jwt.DecodeError:
-        raise AuthenticationFailed("Token decode error.")
-    except jwt.InvalidTokenError:
-        raise AuthenticationFailed("Invalid token.")
+        try:
+            payload = jwt.decode(
+                token,
+                public_key,
+                algorithms=["RS256"],
+                options={"verify_signature": True},
+            )
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Token has expired.")
+        except jwt.DecodeError:
+            raise AuthenticationFailed("Token decode error.")
+        except jwt.InvalidTokenError:
+            raise AuthenticationFailed("Invalid token.")
 
-    user_id = payload.get("sub")
-    if user_id:
-        customer, created = Customer.objects.get_or_create(
-            clerk_id=user_id,
-            defaults={
-                "email": payload.get("email", ""),
-                "first_name": payload.get("given_name", ""),
-                "last_name": payload.get("family_name", ""),
-            },
-        )
-        return customer  # ✅ Return Customer instead of User
-    return None
+        user_id = payload.get("sub")
+        if user_id:
+            customer, created = Customer.objects.get_or_create(
+                clerk_id=user_id,
+                defaults={
+                    "email": payload.get("email", ""),
+                    "first_name": payload.get("given_name", ""),
+                    "last_name": payload.get("family_name", ""),
+                },
+            )
+            return customer  # ✅ Return Customer instead of User
+        return None
 
 class ClerkSDK:
     def fetch_user_info(self, user_id: str):
