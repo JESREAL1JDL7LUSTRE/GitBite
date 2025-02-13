@@ -1,18 +1,16 @@
 
 import './App.css'
-import Item from './pages/Item';
-
+import { ThemeProvider } from './components/ui/theme-provider'
+import HomePage from './pages/HomePage'
 
 function App() {
   return (
-    <div className="bg-yellow-300 h-screen" >
-            <div>
-                </div>
-                <Item/>
-                <div>
-
-                </div>
-
+    <div >
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <HomePage />
+      </ThemeProvider>
+       
+      
     </div>
   )
 }

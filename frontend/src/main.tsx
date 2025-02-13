@@ -3,18 +3,18 @@ import "./index.css";
 import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ClerkProvider } from "@clerk/clerk-react";
-import Item from "./pages/Item.tsx";
-import LayoutFor from "./components/LayoutFor.tsx";
+import Menu from "./pages/Menu.tsx";
+import About from "./pages/About.tsx";
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const PUBLISHABLE_KEY = import.meta.env.VITE_PUBLISHABLE_KEY;
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <LayoutFor />,
+    element: <App />,
     children: [
-      { index: true, element: <App /> },
-      { path: "item", element: <Item /> },
+      { path: "menu", element: <Menu /> },
+      { path: "about", element: <About /> },
     ],
   },
 ]);
